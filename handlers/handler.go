@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+	"fmt"
+	"log"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5"
@@ -108,7 +110,6 @@ func GetPatientRegistrations(pgDB *pgxpool.Pool) http.HandlerFunc {
 			// Set time to end of day for endDate
 			endDate = time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 999999999, time.UTC)
 
-
 			// Query with parameters
 			rows, err = pgDB.Query(ctx, query, startDate, endDate)
 			// Tambahkan log untuk query dan parameter
@@ -125,7 +126,7 @@ func GetPatientRegistrations(pgDB *pgxpool.Pool) http.HandlerFunc {
 
 			rows, err = pgDB.Query(ctx, query, startDate)
 			// Tambahkan log untuk query dan parameter
-			log.Printf("Executing query: %s, Parameters: %v\n", query, []interface{}{endDate})
+			log.Printf("Executing query: %s, Parameters: %v\n", query, []interface{}{startDate})
 		} else if endDateStr != "" {
 			endDate, err := time.Parse("2006-01-02", endDateStr)
 			if err != nil {
