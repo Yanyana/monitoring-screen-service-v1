@@ -1,44 +1,30 @@
-# Stage 1: Build
-FROM golang:1.20 AS builder
+# Build stage
+FROM golang:1.22-alpine AS build-stage
 
 # Set working directory
 WORKDIR /app
 
-# Copy go.mod and go.sum to download dependencies
-COPY go.mod go.sum ./
+# Copy all files from the current directory to the container /app
+COPY . .
 
 # Download dependencies
 RUN go mod download
 
-# Copy the entire project
-COPY . .
 
-# Build the application
-RUN go build -o service .
+# Deploy the application binary
+FROM alpine:3.13 AS build-stage-release
 
-# Stage 2: Runtime
-FROM debian:bullseye-slim
+# Deploy the application binary
+FROM alpine:3.13 AS build-stage-release
 
-# Set timezone to ensure logs have correct timestamps (optional)
-ENV TZ=UTC
-
-# Install minimal dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
-
-# Set working directory
+# Set current working directory to /app
 WORKDIR /app
 
-# Copy binary from builder stage
-COPY --from=builder /app/service .
+# Build the application binary
+RUN CGO_ENABLED=0 GOOS=linux go build -o ./bin/backend-monitoring-v1-api  .
 
-# Expose port used by the service
+
 EXPOSE 8081
 
-# Set environment variables (optional)
-ENV REDIS_ADDR=redis:6379
-ENV REDIS_PASS=
-
 # Command to run the application
-CMD ["./service"]
+CMD ["./backend-monitoring-v1-api"]
