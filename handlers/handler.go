@@ -57,6 +57,8 @@ func GetPatientRegistrations(pgDB *pgxpool.Pool) http.HandlerFunc {
 		startDateStr := r.URL.Query().Get("startDate")
 		endDateStr := r.URL.Query().Get("endDate")
 
+		fmt.Println("Hello", startDateStr)
+		fmt.Println("Hello", endDateStr)
 		// Prepare query with conditions
 		query := `
 			SELECT 
