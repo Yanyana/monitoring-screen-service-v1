@@ -96,11 +96,17 @@ func GetPatientRegistrations(pgDB *pgxpool.Pool) http.HandlerFunc {
 				return
 			}
 
+			// Set time to midnight for startDate
+			startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.UTC)
+
 			endDate, err := time.Parse("2006-01-02", endDateStr)
 			if err != nil {
 				http.Error(w, "Invalid endDate format. Expected YYYY-MM-DD.", http.StatusBadRequest)
 				return
 			}
+
+			// Set time to end of day for endDate
+			endDate = time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 999999999, time.UTC)
 
 			// Query with parameters
 			rows, err = pgDB.Query(ctx, query, startDate, endDate)
@@ -111,6 +117,9 @@ func GetPatientRegistrations(pgDB *pgxpool.Pool) http.HandlerFunc {
 				return
 			}
 
+			// Set time to midnight for startDate
+			startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.UTC)
+
 			rows, err = pgDB.Query(ctx, query, startDate)
 		} else if endDateStr != "" {
 			endDate, err := time.Parse("2006-01-02", endDateStr)
@@ -118,6 +127,9 @@ func GetPatientRegistrations(pgDB *pgxpool.Pool) http.HandlerFunc {
 				http.Error(w, "Invalid endDate format. Expected YYYY-MM-DD.", http.StatusBadRequest)
 				return
 			}
+
+			// Set time to end of day for endDate
+			endDate = time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 999999999, time.UTC)
 
 			rows, err = pgDB.Query(ctx, query, endDate)
 		} else {
